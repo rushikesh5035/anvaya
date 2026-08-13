@@ -1,8 +1,9 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cva, type VariantProps } from "class-variance-authority";
+import { Slot } from "radix-ui";
+
+import { cn } from "@/lib/utils";
 
 const markerVariants = cva(
   "group/marker relative flex min-h-4 w-full items-center gap-2 text-left text-xs/relaxed text-muted-foreground [&_svg:not([class*='size-'])]:size-3.5 [a]:underline [a]:underline-offset-3 [a]:hover:text-foreground",
@@ -16,7 +17,7 @@ const markerVariants = cva(
       },
     },
   }
-)
+);
 
 function Marker({
   className,
@@ -25,9 +26,9 @@ function Marker({
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof markerVariants> & {
-    asChild?: boolean
+    asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot.Root : "div"
+  const Comp = asChild ? Slot.Root : "div";
 
   return (
     <Comp
@@ -36,7 +37,7 @@ function Marker({
       className={cn(markerVariants({ variant, className }))}
       {...props}
     />
-  )
+  );
 }
 
 function MarkerIcon({ className, ...props }: React.ComponentProps<"span">) {
@@ -50,7 +51,7 @@ function MarkerIcon({ className, ...props }: React.ComponentProps<"span">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function MarkerContent({ className, ...props }: React.ComponentProps<"span">) {
@@ -58,12 +59,12 @@ function MarkerContent({ className, ...props }: React.ComponentProps<"span">) {
     <span
       data-slot="marker-content"
       className={cn(
-        "min-w-0 wrap-break-word group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "*:[a]:hover:text-foreground min-w-0 wrap-break-word group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Marker, MarkerIcon, MarkerContent, markerVariants }
+export { Marker, MarkerIcon, MarkerContent, markerVariants };

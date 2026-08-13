@@ -1,9 +1,10 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "radix-ui"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cva, type VariantProps } from "class-variance-authority";
+import { Slot } from "radix-ui";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const attachmentVariants = cva(
   "group/attachment relative flex w-fit max-w-full min-w-0 shrink-0 flex-wrap rounded-lg border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/30 has-[>a,>button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed",
@@ -21,7 +22,7 @@ const attachmentVariants = cva(
       },
     },
   }
-)
+);
 
 function Attachment({
   className,
@@ -31,7 +32,7 @@ function Attachment({
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof attachmentVariants> & {
-    state?: "idle" | "uploading" | "processing" | "error" | "done"
+    state?: "idle" | "uploading" | "processing" | "error" | "done";
   }) {
   return (
     <div
@@ -42,7 +43,7 @@ function Attachment({
       className={cn(attachmentVariants({ size, orientation }), className)}
       {...props}
     />
-  )
+  );
 }
 
 const attachmentMediaVariants = cva(
@@ -59,7 +60,7 @@ const attachmentMediaVariants = cva(
       variant: "icon",
     },
   }
-)
+);
 
 function AttachmentMedia({
   className,
@@ -73,7 +74,7 @@ function AttachmentMedia({
       className={cn(attachmentMediaVariants({ variant }), className)}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentContent({
@@ -89,7 +90,7 @@ function AttachmentContent({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentTitle({
@@ -100,12 +101,12 @@ function AttachmentTitle({
     <span
       data-slot="attachment-title"
       className={cn(
-        "block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer",
+        "group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer block max-w-full min-w-0 truncate font-medium",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentDescription({
@@ -116,13 +117,13 @@ function AttachmentDescription({
     <span
       data-slot="attachment-description"
       className={cn(
-        "mt-0.5 block min-w-0 truncate text-xs text-muted-foreground group-data-[state=error]/attachment:text-destructive/80",
+        "text-muted-foreground group-data-[state=error]/attachment:text-destructive/80 mt-0.5 block min-w-0 truncate text-xs",
         "max-w-full",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentActions({
@@ -138,7 +139,7 @@ function AttachmentActions({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentAction({
@@ -155,7 +156,7 @@ function AttachmentAction({
       className={cn(className)}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentTrigger({
@@ -164,9 +165,9 @@ function AttachmentTrigger({
   type,
   ...props
 }: React.ComponentProps<"button"> & {
-  asChild?: boolean
+  asChild?: boolean;
 }) {
-  const Comp = asChild ? Slot.Root : "button"
+  const Comp = asChild ? Slot.Root : "button";
 
   return (
     <Comp
@@ -175,7 +176,7 @@ function AttachmentTrigger({
       className={cn("absolute inset-0 z-10 outline-none", className)}
       {...props}
     />
-  )
+  );
 }
 
 function AttachmentGroup({ className, ...props }: React.ComponentProps<"div">) {
@@ -183,12 +184,12 @@ function AttachmentGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="attachment-group"
       className={cn(
-        "flex min-w-0 scroll-fade-x snap-x snap-mandatory scroll-px-1 scrollbar-none gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start",
+        "scroll-fade-x flex min-w-0 snap-x snap-mandatory scroll-px-1 scrollbar-none gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -201,4 +202,4 @@ export {
   AttachmentActions,
   AttachmentAction,
   AttachmentTrigger,
-}
+};
