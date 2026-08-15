@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
-export default function Home() {
+import Logout from "@/module/auth/components/logout";
+import { requireAuth } from "@/module/auth/lib/auth-utils";
+
+export default async function Home() {
+  await requireAuth();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <Button>Hello from Anvaya</Button>
+    <div>
+      <Logout>
+        <Button>Logout</Button>
+      </Logout>
     </div>
   );
 }
