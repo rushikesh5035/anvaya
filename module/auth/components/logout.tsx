@@ -16,7 +16,8 @@ const Logout = ({
   const router = useRouter();
 
   return (
-    <span
+    <button
+      type="button"
       className={className}
       onClick={() =>
         signOut({
@@ -29,7 +30,7 @@ const Logout = ({
       }
     >
       {children}
-    </span>
+    </button>
   );
 };
 

@@ -9,16 +9,24 @@ import { signIn } from "@/lib/auth-client";
 
 const LoginUI = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
+    setLoginError(null);
 
     try {
-      await signIn.social({
+      const result = await signIn.social({
         provider: "github",
       });
+
+      if (result?.error) {
+        setLoginError("GitHub sign-in failed. Please try again.");
+      }
     } catch (error) {
       console.error("Login Error:", error);
+      setLoginError("GitHub sign-in failed. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -31,6 +39,11 @@ const LoginUI = () => {
             <h2 className="mb-2 text-3xl font-bold">Welcome Back</h2>
             <p>Login using the following providers:</p>
           </div>
+          {loginError ? (
+            <p className="mb-4 text-sm text-red-400" role="alert">
+              {loginError}
+            </p>
+          ) : null}
 
           {/* Github Login button */}
           <button
