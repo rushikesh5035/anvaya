@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 
+import { ThemeProvider } from "@/components/common/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +40,17 @@ export default function RootLayout({
         "font-sans",
         inter.variable
       )}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
-        <TooltipProvider>{children}</TooltipProvider>
+      <body className="">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
