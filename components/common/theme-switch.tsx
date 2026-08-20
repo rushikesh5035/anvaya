@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useSyncExternalStore } from "react";
 
 import { useTheme } from "next-themes";
 
@@ -132,6 +132,15 @@ export const ThemeToggleButton = ({
     gifUrl,
   });
 
+  // useSyncExternalStore is the React-recommended way to detect client-side mount
+  // without using useEffect+setState (which triggers the set-state-in-effect lint rule).
+  // Server snapshot → false, client snapshot → true.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
   return (
     <Button
       type="button"
@@ -145,7 +154,16 @@ export const ThemeToggleButton = ({
       aria-label="Toggle theme"
     >
       <span className="sr-only">Toggle theme</span>
-      {isDark ? <Moon className="size-4" /> : <Sun className="size-4" />}
+      {/* Render a fixed-size invisible span on the server so layout is stable */}
+      {mounted ? (
+        isDark ? (
+          <Moon className="size-4" />
+        ) : (
+          <Sun className="size-4" />
+        )
+      ) : (
+        <span className="size-4" aria-hidden="true" />
+      )}
     </Button>
   );
 };
