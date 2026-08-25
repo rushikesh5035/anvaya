@@ -30,8 +30,8 @@ const DashboardStatsSection = () => {
       />
       <StatCard
         icon={<GitCommit className="h-4 w-4" />}
-        title="Total Commits"
-        value={stats?.totalCommits ?? 0}
+        title="Total Contributions"
+        value={stats?.totalContributions ?? 0}
         description="In the last year"
         isLoading={isLoading}
       />

@@ -93,8 +93,8 @@ const ActivityBarChart = () => {
               />
               <Legend />
               <Bar
-                dataKey="commits"
-                name="Commits"
+                dataKey="contributions"
+                name="Contributions"
                 fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
               />
@@ -123,7 +123,7 @@ const ActivityBarChart = () => {
         <CardHeader>
           <CardTitle>Activity Overview</CardTitle>
           <CardDescription>
-            Monthly breakdown of commits, PRs, and review (last 1 years)
+            Monthly breakdown of contributions, PRs, and review (last 12 months)
           </CardDescription>
         </CardHeader>
         <CardContent>{renderContent()}</CardContent>

@@ -19,14 +19,14 @@ export interface ContributionDay {
 
 export interface DashboardStats {
   totalRepos: number;
-  totalCommits: number;
+  totalContributions: number;
   totalPRs: number;
   totalAIReviews: number;
 }
 
 export interface MonthlyActivityItem {
   month: string;
-  commits: number;
+  contributions: number;
   prs: number;
   aiReviews: number;
 }
@@ -101,7 +101,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       token,
       username
     );
-    const totalCommits = calendar?.totalContributions ?? 0;
+    const totalContributions = calendar?.totalContributions ?? 0;
 
     const { data: pullRequests } =
       await octokit.rest.search.issuesAndPullRequests({
@@ -113,10 +113,15 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     // TODO: DB query once AI review tracking is implemented
     const totalAIReviews = 0;
 
-    return { totalRepos, totalCommits, totalPRs, totalAIReviews };
+    return { totalRepos, totalContributions, totalPRs, totalAIReviews };
   } catch (error) {
     console.error("Failed to fetch dashboard stats:", error);
-    return { totalRepos: 0, totalCommits: 0, totalPRs: 0, totalAIReviews: 0 };
+    return {
+      totalRepos: 0,
+      totalContributions: 0,
+      totalPRs: 0,
+      totalAIReviews: 0,
+    };
   }
 };
 
@@ -132,7 +137,7 @@ export const getMonthlyActivity = async (): Promise<MonthlyActivityItem[]> => {
     const months: { key: string; label: string }[] = [];
     const monthlyData: Record<
       string,
-      { commits: number; prs: number; aiReviews: number }
+      { contributions: number; prs: number; aiReviews: number }
     > = {};
 
     for (let i = 11; i >= 0; i--) {
@@ -140,16 +145,16 @@ export const getMonthlyActivity = async (): Promise<MonthlyActivityItem[]> => {
       const key = `${date.getFullYear()}-${date.getMonth()}`;
       const label = MONTH_NAMES[date.getMonth()];
       months.push({ key, label });
-      monthlyData[key] = { commits: 0, prs: 0, aiReviews: 0 };
+      monthlyData[key] = { contributions: 0, prs: 0, aiReviews: 0 };
     }
 
-    // Accumulate commits from the GitHub contribution calendar.
+    // Accumulate contributions from the GitHub contribution calendar.
     calendar.weeks.forEach((week) => {
       week.contributionDays.forEach((day) => {
         const date = new Date(day.date);
         const key = `${date.getFullYear()}-${date.getMonth()}`;
         if (monthlyData[key]) {
-          monthlyData[key].commits += day.contributionCount;
+          monthlyData[key].contributions += day.contributionCount;
         }
       });
     });
@@ -157,12 +162,15 @@ export const getMonthlyActivity = async (): Promise<MonthlyActivityItem[]> => {
     // Accumulate PRs from the GitHub Search API for the last 12 months.
     const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-    const { data: prs } = await octokit.rest.search.issuesAndPullRequests({
-      q: `author:${username} type:pr created:>${twelveMonthsAgo.toISOString().split("T")[0]}`,
-      per_page: 100,
-    });
+    const prs = await octokit.paginate(
+      octokit.rest.search.issuesAndPullRequests,
+      {
+        q: `author:${username} type:pr created:>${twelveMonthsAgo.toISOString().split("T")[0]}`,
+        per_page: 100,
+      }
+    );
 
-    prs.items.forEach((pr) => {
+    prs.forEach((pr) => {
       const date = new Date(pr.created_at);
       const key = `${date.getFullYear()}-${date.getMonth()}`;
       if (monthlyData[key]) {
