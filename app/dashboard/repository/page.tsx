@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import RepositoryCard from "@/module/repository/components/repository-card";
 import RepositoryPageShell from "@/module/repository/components/repository-page-shell";
 import { RepositoryListSkeleton } from "@/module/repository/components/repository-skeleton";
+import { useConnectRepository } from "@/module/repository/hooks/use-connect-repository";
 import { useRepositories } from "@/module/repository/hooks/use-repositories";
 import type { RepositoryListItem } from "@/module/repository/types";
 
@@ -20,6 +21,8 @@ const RepositoryPage = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useRepositories();
+
+  const { mutate: connectRepository } = useConnectRepository();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [localConnectingId, setLocalConnectingId] = useState<number | null>(
@@ -64,7 +67,23 @@ const RepositoryPage = () => {
     );
   }, [allRepositories, searchQuery]);
 
-  const handleConnect = (repository: RepositoryListItem) => {};
+  const handleConnect = (repository: RepositoryListItem) => {
+    const [owner] = repository.fullName.split("/");
+
+    if (!owner) return;
+
+    setLocalConnectingId(repository.id);
+    connectRepository(
+      {
+        owner,
+        name: repository.name,
+        githubId: repository.id,
+      },
+      {
+        onSettled: () => setLocalConnectingId(null),
+      }
+    );
+  };
 
   if (isLoading) {
     return (

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 
 import { ThemeProvider } from "@/components/common/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryProvider } from "@/lib/query-provider";
 import { cn } from "@/lib/utils";
@@ -51,7 +52,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              {children}
+              <Toaster />
+            </TooltipProvider>
           </ThemeProvider>
         </QueryProvider>
       </body>

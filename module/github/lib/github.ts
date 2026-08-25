@@ -122,3 +122,46 @@ export const getRepositories = async (
     throw new Error("Failed to fetch GitHub repositories");
   }
 };
+
+/* 
+Creates a webhook for the given GitHub repository using the provided personal access token.
+*/
+export const createWebhook = async (owner: string, repo: string) => {
+  try {
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL;
+
+    if (!appBaseUrl) {
+      throw new Error("NEXT_PUBLIC_APP_BASE_URL is not configured");
+    }
+
+    const token = await getGithubAccessToken();
+    const octokit = new Octokit({ auth: token });
+    const webhookUrl = `${appBaseUrl}/api/webhooks/github`;
+
+    const { data: hooks } = await octokit.rest.repos.listWebhooks({
+      owner,
+      repo,
+    });
+
+    const existingHook = hooks.find((hook) => hook.config.url === webhookUrl);
+
+    if (existingHook) {
+      return existingHook;
+    }
+
+    const { data: newHook } = await octokit.rest.repos.createWebhook({
+      owner,
+      repo,
+      config: {
+        url: webhookUrl,
+        content_type: "json",
+      },
+      events: ["pull_request"],
+    });
+
+    return newHook;
+  } catch (error) {
+    console.error("Error creating GitHub webhook:", error);
+    throw new Error("Failed to create GitHub webhook");
+  }
+};

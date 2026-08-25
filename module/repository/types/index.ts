@@ -9,3 +9,15 @@ export type RepositoryListItem = {
   isPrivate: boolean;
   isConnected: boolean;
 };
+
+export type ConnectRepositoryInput = {
+  owner: string;
+  name: string;
+  githubId: number;
+};
+
+export type ConnectRepositoryResult = {
+  repositoryId: string;
+  fullName: string;
+  alreadyConnected: boolean;
+};
