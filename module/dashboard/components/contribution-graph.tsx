@@ -39,8 +39,8 @@ const ContributionGraph = () => {
 
   if (!data || !data.contributions.length) {
     return (
-      <div className="item-center flex w-full flex-col justify-center p-8">
-        <div className="text-muted-foreground animate-pulse">
+      <div className="flex w-full flex-col items-center justify-center p-8">
+        <div className="text-muted-foreground">
           No contribution data available
         </div>
       </div>

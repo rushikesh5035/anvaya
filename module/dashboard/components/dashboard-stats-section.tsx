@@ -16,10 +16,11 @@ const DashboardStatsSection = () => {
     queryKey: ["dashboard-stats"],
     queryFn: async () => getDashboardStats(),
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
   });
 
   return (
-    <div className="grid gap-5 md:grid-cols-4">
+    <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
       <StatCard
         icon={<GitBranch className="h-4 w-4" />}
         title="Total Repositories"
