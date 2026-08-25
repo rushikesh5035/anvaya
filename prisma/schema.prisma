@@ -19,8 +19,28 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  @@unique([email])
-  @@map("user")
+  repositories   Repository[]
+
+  @@unique([email]) // create unique index on email for faster queries
+  @@map("user") // create table name as "user" instead of default "User"
+}
+
+model Repository {
+  id            String    @id @default(cuid())
+  githubId      BigInt    @unique
+  name          String 
+  owner         String
+  fullName      String
+  url           String
+  userId        String
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId]) // create index on userId for faster queries
+  @@map("repository")
 }
 
 model Session {

@@ -94,3 +94,31 @@ export const getGithubContributions = async (
     throw new Error("Failed to fetch GitHub contributions");
   }
 };
+
+// Fetches the list of repositories for the given GitHub username using the provided personal access token.
+export const getRepositories = async (
+  page: number = 1,
+  perPage: number = 10
+) => {
+  try {
+    const token = await getGithubAccessToken();
+    const octokit = new Octokit({ auth: token });
+
+    // Fetch all private, public etc repositories for the authenticated user
+    const { data: privateAndPublicRepos } =
+      await octokit.rest.repos.listForAuthenticatedUser({
+        sort: "updated",
+        direction: "desc",
+        visibility: "all", // all, public, private forks repos
+        per_page: perPage, // pagination: number of repositories per page
+        page, // pagination: current page number
+      });
+
+    // console.log("Fetched repositories from GitHub:", privateAndPublicRepos);
+
+    return privateAndPublicRepos;
+  } catch (error) {
+    console.error("Error fetching GitHub repositories:", error);
+    throw new Error("Failed to fetch GitHub repositories");
+  }
+};
