@@ -5,14 +5,14 @@ import { Octokit } from "octokit";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-interface ContrinutionDay {
+interface ContributionDay {
   contributionCount: number;
   date: string;
   color: string;
 }
 
 interface ContributionWeek {
-  contributionDays: ContrinutionDay[];
+  contributionDays: ContributionDay[];
 }
 
 export interface ContributionCalendar {

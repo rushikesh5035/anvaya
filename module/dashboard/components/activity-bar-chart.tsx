@@ -34,6 +34,7 @@ const ActivityBarChart = () => {
     queryKey: ["monthly-activity"],
     queryFn: async () => await getMonthlyActivity(),
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
   });
 
   // useSyncExternalStore: returns false on the server, true on the client.
@@ -122,7 +123,7 @@ const ActivityBarChart = () => {
         <CardHeader>
           <CardTitle>Activity Overview</CardTitle>
           <CardDescription>
-            Monthly breakdown of commits, PRs, and review (last 6 months)
+            Monthly breakdown of commits, PRs, and review (last 1 years)
           </CardDescription>
         </CardHeader>
         <CardContent>{renderContent()}</CardContent>

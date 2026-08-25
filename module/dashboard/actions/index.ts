@@ -31,7 +31,6 @@ export interface MonthlyActivityItem {
   aiReviews: number;
 }
 
-// Converts a raw contributionCount into a 0-4 heat-map level.
 function toLevel(count: number): number {
   if (count === 0) return 0;
   if (count <= 3) return 1;
@@ -53,28 +52,27 @@ const MONTH_NAMES = [
   "Oct",
   "Nov",
   "Dec",
-];
+] as const;
+
+const getAuthenticatedUser = async () => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+  const { data: user } = await octokit.rest.users.getAuthenticated();
+
+  return { session, token, username: user.login, octokit };
+};
 
 export const getContributionState = async (): Promise<{
   contributions: ContributionDay[];
   totalContributions: number;
 } | null> => {
   try {
-    // Get the current session from the auth API
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    if (!session?.user) throw new Error("Unauthorized");
-
-    const token = await getGithubAccessToken();
-    const octokit = new Octokit({ auth: token });
-
-    const { data: user } = await octokit.rest.users.getAuthenticated();
-
-    const username = user.login;
+    const { token, username } = await getAuthenticatedUser();
 
     const calendar = await getGithubContributions(token, username);
-
     if (!calendar) return null;
 
     const contributions: ContributionDay[] = calendar.weeks.flatMap((week) =>
@@ -85,10 +83,7 @@ export const getContributionState = async (): Promise<{
       }))
     );
 
-    return {
-      contributions,
-      totalContributions: calendar.totalContributions,
-    };
+    return { contributions, totalContributions: calendar.totalContributions };
   } catch (error) {
     console.error("Error fetching contribution stats:", error);
     return null;
@@ -97,150 +92,93 @@ export const getContributionState = async (): Promise<{
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    if (!session?.user) throw new Error("Unauthorized");
+    const { token, username, octokit } = await getAuthenticatedUser();
 
-    const token = await getGithubAccessToken();
-    const octokit = new Octokit({ auth: token });
-    const { data: user } = await octokit.rest.users.getAuthenticated();
+    // TODO: DB query once repository tracking is implemented
+    const totalRepos = 0;
 
-    // TODO: Fetch total connected repos from DB
-    const totalRepos = 30;
-
-    // Fetch github contributions from the github api using the access token
-    const calender: ContributionCalendar = await getGithubContributions(
+    const calendar: ContributionCalendar = await getGithubContributions(
       token,
-      user.login
+      username
     );
-    const totalCommits = calender?.totalContributions || 0;
+    const totalCommits = calendar?.totalContributions ?? 0;
 
-    // Count PR's from DB or Github
-    const { data: pullRequst } =
+    const { data: pullRequests } =
       await octokit.rest.search.issuesAndPullRequests({
-        q: `author:${user.login} type:pr`,
+        q: `author:${username} type:pr`,
         per_page: 1,
       });
+    const totalPRs = pullRequests.total_count;
 
-    const totalPRs = pullRequst.total_count;
+    // TODO: DB query once AI review tracking is implemented
+    const totalAIReviews = 0;
 
-    // TODO: Count AI Reviews from DB
-    const totalAIReviews = 10;
-
-    return {
-      totalRepos,
-      totalCommits,
-      totalPRs,
-      totalAIReviews,
-    };
+    return { totalRepos, totalCommits, totalPRs, totalAIReviews };
   } catch (error) {
-    console.error("Failed to fetch dashboard stats", error);
-    return {
-      totalRepos: 0,
-      totalCommits: 0,
-      totalPRs: 0,
-      totalAIReviews: 0,
-    };
+    console.error("Failed to fetch dashboard stats:", error);
+    return { totalRepos: 0, totalCommits: 0, totalPRs: 0, totalAIReviews: 0 };
   }
 };
 
 export const getMonthlyActivity = async (): Promise<MonthlyActivityItem[]> => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const { token, username, octokit } = await getAuthenticatedUser();
 
-    if (!session?.user) throw new Error("Unauthorized");
+    const calendar = await getGithubContributions(token, username);
+    if (!calendar) return [];
 
-    const token = await getGithubAccessToken();
-    const octokit = new Octokit({ auth: token });
+    const now = new Date();
 
-    // get users github username from the database
-    const { data: user } = await octokit.rest.users.getAuthenticated();
-
-    const calender = await getGithubContributions(token, user.login);
-    if (!calender) return [];
-
-    // group contributions data by month and year
+    const months: { key: string; label: string }[] = [];
     const monthlyData: Record<
       string,
       { commits: number; prs: number; aiReviews: number }
     > = {};
 
-    // initialize last 6 month data
-    const now = new Date();
-    for (let i = 0; i < 6; i++) {
+    for (let i = 11; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-
-      const monthKey = MONTH_NAMES[date.getMonth()];
-
-      monthlyData[monthKey] = { commits: 0, prs: 0, aiReviews: 0 };
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      const label = MONTH_NAMES[date.getMonth()];
+      months.push({ key, label });
+      monthlyData[key] = { commits: 0, prs: 0, aiReviews: 0 };
     }
 
-    calender.weeks.forEach((week) => {
+    // Accumulate commits from the GitHub contribution calendar.
+    calendar.weeks.forEach((week) => {
       week.contributionDays.forEach((day) => {
         const date = new Date(day.date);
-        const monthKey = MONTH_NAMES[date.getMonth()];
-
-        if (monthlyData[monthKey]) {
-          monthlyData[monthKey].commits += day.contributionCount;
+        const key = `${date.getFullYear()}-${date.getMonth()}`;
+        if (monthlyData[key]) {
+          monthlyData[key].commits += day.contributionCount;
         }
       });
     });
 
-    // Fetch review from db for last 6 month
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    // TODO: REVIEWS REAL DATA
-    const generateSampleReviews = () => {
-      const sampleReviews = [];
-      const now = new Date();
-
-      // generate random reviewd over the past 6 months
-      for (let i = 0; i < 6; i++) {
-        const randomDaysAgo = Math.floor(Math.random() * 180); // Random days in last 6 months
-        const reviewDate = new Date(now);
-        reviewDate.setDate(reviewDate.getDate() - randomDaysAgo);
-
-        sampleReviews.push({
-          createdAt: reviewDate,
-        });
-      }
-
-      return sampleReviews;
-    };
-
-    const reviews = generateSampleReviews();
-
-    reviews.forEach((review) => {
-      const monthKey = MONTH_NAMES[review.createdAt.getMonth()];
-
-      if (monthlyData[monthKey]) {
-        monthlyData[monthKey].aiReviews += 1;
-      }
-    });
+    // Accumulate PRs from the GitHub Search API for the last 12 months.
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
     const { data: prs } = await octokit.rest.search.issuesAndPullRequests({
-      q: `author:${user.login} type:pr created:>${sixMonthsAgo.toISOString().split("T")[0]}`,
+      q: `author:${username} type:pr created:>${twelveMonthsAgo.toISOString().split("T")[0]}`,
       per_page: 100,
     });
 
     prs.items.forEach((pr) => {
       const date = new Date(pr.created_at);
-      const monthKey = MONTH_NAMES[date.getMonth()];
-      if (monthlyData[monthKey]) {
-        monthlyData[monthKey].prs += 1;
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      if (monthlyData[key]) {
+        monthlyData[key].prs += 1;
       }
     });
 
-    return Object.keys(monthlyData).map((month) => ({
-      month,
-      ...monthlyData[month],
+    // TODO: DB query for AI reviews per month
+
+    // Map internal year-safe keys back to display labels for the chart.
+    return months.map(({ key, label }) => ({
+      month: label,
+      ...monthlyData[key],
     }));
   } catch (error) {
-    console.error("Failed to fetch monthly activity", error);
+    console.error("Failed to fetch monthly activity:", error);
     return [];
   }
 };
