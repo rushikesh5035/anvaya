@@ -21,3 +21,28 @@ export type ConnectRepositoryResult = {
   fullName: string;
   alreadyConnected: boolean;
 };
+
+export type DisconnectRepositoryInput = {
+  githubId: number;
+};
+
+export type DisconnectRepositoryResult =
+  | {
+      success: true;
+      message: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
+export type DisconnectAllRepositoriesResult =
+  | {
+      success: true;
+      count: number;
+      message: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };

@@ -28,10 +28,17 @@ export interface ContributionData {
   };
 }
 
-/*
-- Get Github access token for the currently authenticated user and returns it
-- Throws "Unauthorized" if there is no session or no linked Github account
-*/
+const getAppBaseUrl = () => {
+  const appBaseUrl =
+    process.env.APP_BASE_URL ?? process.env.NEXT_PUBLIC_APP_BASE_URL;
+
+  if (!appBaseUrl) {
+    throw new Error("APP_BASE_URL is not configured");
+  }
+
+  return appBaseUrl;
+};
+
 export const getGithubAccessToken = async (): Promise<string> => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -53,9 +60,6 @@ export const getGithubAccessToken = async (): Promise<string> => {
   return account?.accessToken;
 };
 
-/* 
-Fetches the contribution calendar for the given Github username using the provided personal access token. Returns calender object
-*/
 export const getGithubContributions = async (
   token: string,
   username: string
@@ -114,8 +118,6 @@ export const getRepositories = async (
         page, // pagination: current page number
       });
 
-    // console.log("Fetched repositories from GitHub:", privateAndPublicRepos);
-
     return privateAndPublicRepos;
   } catch (error) {
     console.error("Error fetching GitHub repositories:", error);
@@ -123,19 +125,13 @@ export const getRepositories = async (
   }
 };
 
-/* 
-Creates a webhook for the given GitHub repository using the provided personal access token.
-*/
 export const createWebhook = async (owner: string, repo: string) => {
   try {
-    const appBaseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL;
-
-    if (!appBaseUrl) {
-      throw new Error("NEXT_PUBLIC_APP_BASE_URL is not configured");
-    }
+    const appBaseUrl = getAppBaseUrl();
 
     const token = await getGithubAccessToken();
     const octokit = new Octokit({ auth: token });
+
     const webhookUrl = `${appBaseUrl}/api/webhooks/github`;
 
     const { data: hooks } = await octokit.rest.repos.listWebhooks({
@@ -163,5 +159,40 @@ export const createWebhook = async (owner: string, repo: string) => {
   } catch (error) {
     console.error("Error creating GitHub webhook:", error);
     throw new Error("Failed to create GitHub webhook");
+  }
+};
+
+export const deleteWebhook = async (owner: string, repo: string) => {
+  try {
+    const appBaseUrl = getAppBaseUrl();
+
+    const token = await getGithubAccessToken();
+    const octokit = new Octokit({ auth: token });
+
+    const webhookUrl = `${appBaseUrl}/api/webhooks/github`;
+
+    // Get the list of webhooks for the repository
+    const { data: hooks } = await octokit.rest.repos.listWebhooks({
+      owner,
+      repo,
+    });
+
+    // Check if the webhook exists before attempting to delete it
+    const existingHook = hooks.find((hook) => hook.config.url === webhookUrl);
+
+    if (existingHook) {
+      await octokit.rest.repos.deleteWebhook({
+        owner,
+        repo,
+        hook_id: existingHook.id,
+      });
+
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error deleting GitHub webhook:", error);
+    throw new Error("Failed to delete GitHub webhook");
   }
 };
