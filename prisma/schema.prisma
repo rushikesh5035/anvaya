@@ -20,6 +20,10 @@ model User {
   accounts      Account[]
 
   repositories   Repository[]
+  userUsage      UserUsage?
+
+  subscriptionTier String   @default("FREE") // FREE, PRO, ENTERPRISE
+  subscriptionStatus String?  // ACTIVE, CANCELED, EXPIRED
 
   @@unique([email]) // create unique index on email for faster queries
   @@map("user") // create table name as "user" instead of default "User"
@@ -62,6 +66,20 @@ model Review {
 
   @@index([repositoryId]) 
   @@map("review")
+}
+
+
+model UserUsage {
+  id      String  @id @default(cuid())
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  repositoryCount Int @default(0)
+  reviewCount     Json @default("{}") // store review counts per repository as JSON -> {repoId: count}
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("user_usage")
 }
 
 model Session {
