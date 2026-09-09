@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 
+import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createWebhook, getRepositories } from "@/module/github/lib/github";
@@ -103,6 +104,16 @@ export const connectRepository = async ({
       select: {
         id: true,
         fullName: true,
+      },
+    });
+
+    // Trigger repository indexing in the background using Inngest
+    await inngest.send({
+      name: "repository.connected",
+      data: {
+        owner,
+        repo: name,
+        userId: session.user.id,
       },
     });
 

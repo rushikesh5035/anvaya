@@ -196,3 +196,80 @@ export const deleteWebhook = async (owner: string, repo: string) => {
     throw new Error("Failed to delete GitHub webhook");
   }
 };
+
+export const fetchRepoFileContents = async (
+  token: string,
+  owner: string,
+  repo: string,
+  path: string = ""
+): Promise<{ path: string; content: string }[]> => {
+  try {
+    const octokit = new Octokit({ auth: token });
+
+    const { data: files } = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path,
+    });
+
+    if (!Array.isArray(files)) {
+      // It's a file
+      if (files.type === "file" && files.content) {
+        return [
+          {
+            path: files.path,
+            content: Buffer.from(files.content, "base64").toString("utf-8"),
+          },
+        ];
+      }
+      return [];
+    }
+
+    let filesWithContents: { path: string; content: string }[] = [];
+
+    for (const file of files) {
+      if (file.type === "file") {
+        const { data: fileData } = await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path: file.path,
+        });
+
+        if (
+          !Array.isArray(fileData) &&
+          fileData.type === "file" &&
+          fileData.content
+        ) {
+          // filter out non-code files if needed (images, etc)
+          // for now, let's include everything that looks like a text file
+          if (
+            !file.path.match(
+              /\.(png|jpg|jpeg|gif|pdf|bmp|svg|ico|zip|tar|gz)$/i
+            )
+          ) {
+            filesWithContents.push({
+              path: fileData.path,
+              content: Buffer.from(fileData.content, "base64").toString(
+                "utf-8"
+              ),
+            });
+          }
+        }
+      } else if (file.type === "dir") {
+        // Recursively fetch files in subdirectories
+        const subdirectoryFiles = await fetchRepoFileContents(
+          token,
+          owner,
+          repo,
+          file.path
+        );
+        filesWithContents = filesWithContents.concat(subdirectoryFiles);
+      }
+    }
+
+    return filesWithContents;
+  } catch (error) {
+    console.error("Error fetching GitHub repository file contents:", error);
+    throw new Error("Failed to fetch GitHub repository file contents");
+  }
+};
