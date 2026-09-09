@@ -6,6 +6,10 @@ import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createWebhook, getRepositories } from "@/module/github/lib/github";
+import {
+  canConnectRepository,
+  incrementRepositoryCount,
+} from "@/module/payment/lib/subscription";
 import type {
   ConnectRepositoryInput,
   ConnectRepositoryResult,
@@ -90,6 +94,17 @@ export const connectRepository = async ({
       };
     }
 
+    // Check if the user can connect more repositories based on their subscription tier and usage and then create the webhook for the repository
+    const canUserConnectMoreRepositories = await canConnectRepository(
+      session.user.id
+    );
+
+    if (!canUserConnectMoreRepositories) {
+      throw new Error(
+        "You have reached the limit for connecting repositories. Please upgrade to Pro for unlimited repositories."
+      );
+    }
+
     await createWebhook(owner, name);
 
     const repository = await prisma.repository.create({
@@ -106,6 +121,9 @@ export const connectRepository = async ({
         fullName: true,
       },
     });
+
+    // increment the repository count for the user after successfully connecting the repository
+    await incrementRepositoryCount(session.user.id);
 
     // Trigger repository indexing in the background using Inngest
     await inngest.send({

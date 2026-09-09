@@ -3,6 +3,10 @@
 import { inngest } from "@/inngest/client";
 import { prisma } from "@/lib/prisma";
 import { getPullRequestDiff } from "@/module/github/lib/github";
+import {
+  canCreateReview,
+  incrementReviewCount,
+} from "@/module/payment/lib/subscription";
 
 export async function reviewPullRequest({
   owner,
@@ -38,6 +42,14 @@ export async function reviewPullRequest({
       );
     }
 
+    // check if the user can create a review based on their subscription tier and usage before gettinng github account
+    const canReview = await canCreateReview(repository.userId, repository.id);
+
+    if (!canReview) {
+      throw new Error("You have reached the limit for creating reviews.");
+    }
+
+    // get the GitHub account for the user associated with the repository
     const githubAccount = repository.user.accounts[0];
 
     if (!githubAccount) {
@@ -68,6 +80,9 @@ export async function reviewPullRequest({
         userId: repository.user.id,
       },
     });
+
+    // increment the review count for the user and repository after successfully queuing the review process
+    await incrementReviewCount(repository.userId, repository.id);
 
     return {
       success: true,
