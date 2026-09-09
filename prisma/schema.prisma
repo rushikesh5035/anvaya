@@ -35,13 +35,33 @@ model Repository {
   userId        String
   
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
+  reviews       Review[]
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@unique([userId, githubId])
   @@index([userId]) // create index on userId for faster queries
   @@map("repository")
+}
+
+model Review {
+  id           String    @id @default(cuid())
+  repositoryId  String
+  repository    Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  pullRequestNumber Int
+  pullRequestTitle String
+  pullRequestUrl String
+  review String
+  reviewStatus String @default("completed") // pending, completed, failed
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([repositoryId]) 
+  @@map("review")
 }
 
 model Session {

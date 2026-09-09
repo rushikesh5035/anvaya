@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { reviewPullRequest } from "@/module/ai/actions";
+
 export async function POST(req: NextRequest) {
   try {
     // Parse the incoming request body as JSON from the GitHub webhook payload
@@ -16,6 +18,38 @@ export async function POST(req: NextRequest) {
         },
         { status: 200 }
       );
+    }
+
+    if (event === "pull_request") {
+      const action = body.action;
+      const repository = body.repository.full_name;
+      const pullRequestNumber = body.number;
+
+      console.log(
+        `Pull Request ${pullRequestNumber} in ${repository} was ${action}`
+      );
+
+      const [owner, repoName] = repository.split("/");
+
+      if (action === "opened" || action === "synchronize") {
+        // call function to handle the pull request event
+        reviewPullRequest({
+          owner,
+          repoName,
+          pullRequestNumber,
+        })
+          .then(() => {
+            console.log(
+              `Review process initiated for PR #${pullRequestNumber} in ${repository}`
+            );
+          })
+          .catch((error: string) => {
+            console.error(
+              `Review process failed for PR #${pullRequestNumber} in ${repository}:`,
+              error
+            );
+          });
+      }
     }
 
     return NextResponse.json(

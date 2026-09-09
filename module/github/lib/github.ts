@@ -273,3 +273,62 @@ export const fetchRepoFileContents = async (
     throw new Error("Failed to fetch GitHub repository file contents");
   }
 };
+
+export const getPullRequestDiff = async (
+  token: string,
+  owner: string,
+  repo: string,
+  pullRequestNumber: number
+) => {
+  try {
+    const octokit = new Octokit({ auth: token });
+
+    // get the pull request details to retrieve the diff URL
+    const { data: pullRequest } = await octokit.rest.pulls.get({
+      owner,
+      repo,
+      pull_number: pullRequestNumber,
+    });
+
+    // fetch the diff using the pull request number
+    const { data: diff } = await octokit.rest.pulls.get({
+      owner,
+      repo,
+      pull_number: pullRequestNumber,
+      mediaType: {
+        format: "diff",
+      },
+    });
+
+    return {
+      diff: diff as unknown as string, // Type assertion since Octokit returns a string for diff
+      title: pullRequest.title,
+      description: pullRequest.body,
+    };
+  } catch (error) {
+    console.error("Error fetching pull request diff:", error);
+    throw new Error("Failed to fetch pull request diff");
+  }
+};
+
+export const postReviewComment = async (
+  token: string,
+  owner: string,
+  repo: string,
+  pullRequestNumber: number,
+  review: string
+) => {
+  try {
+    const octokit = new Octokit({ auth: token });
+
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: pullRequestNumber,
+      body: `###🤖 AI Code Review \n\n${review} \n\n *Powered by Anvaya*`,
+    });
+  } catch (error) {
+    console.error("Error posting review comment:", error);
+    throw new Error("Failed to post review comment");
+  }
+};

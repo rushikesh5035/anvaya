@@ -39,7 +39,7 @@ export const navGroups: SidebarNavGroup[] = [
       },
       {
         title: "Review",
-        path: "/dashboard/review",
+        path: "/dashboard/reviews",
         icon: <Sparkles />,
       },
       {
