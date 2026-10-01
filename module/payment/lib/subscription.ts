@@ -105,7 +105,7 @@ export const incrementRepositoryCount = async (
     create: {
       userId,
       repositoryCount: 1,
-      reviewCounts: {},
+      reviewCount: {},
     },
     update: {
       repositoryCount: {
@@ -141,7 +141,7 @@ export const incrementReviewCount = async (
   await prisma.userUsage.update({
     where: { userId },
     data: {
-      reviewCounts,
+      reviewCount: reviewCounts,
     },
   });
 };
@@ -195,6 +195,19 @@ export const updateUserTier = async (
     data: {
       subscriptionTier: tier,
       subscriptionStatus: status,
+      ...(polarSubscriptionId && { polarSubscriptionId }),
+    },
+  });
+};
+
+export const updatePolarCustomerId = async (
+  userId: string,
+  polarCustomerId: string
+): Promise<void> => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      polarCustomerId,
     },
   });
 };

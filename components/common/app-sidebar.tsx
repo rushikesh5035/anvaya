@@ -166,7 +166,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
 
   const isActive = (url: string) => {
-    return pathName === url || pathName.startsWith(url + "/dashboard");
+    if (url === "/dashboard") return pathName === "/dashboard";
+    return pathName === url || pathName.startsWith(url + "/");
   };
 
   if (!mounted || !session) return null;

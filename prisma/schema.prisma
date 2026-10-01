@@ -22,8 +22,11 @@ model User {
   repositories   Repository[]
   userUsage      UserUsage?
 
-  subscriptionTier String   @default("FREE") // FREE, PRO, ENTERPRISE
-  subscriptionStatus String?  // ACTIVE, CANCELED, EXPIRED
+  subscriptionTier   String  @default("FREE") // FREE, PRO, ENTERPRISE
+  subscriptionStatus String? // ACTIVE, CANCELED, EXPIRED
+
+  polarCustomerId     String? @unique // Polar customer ID linked on sign-up
+  polarSubscriptionId String? @unique // Polar subscription ID for the active plan
 
   @@unique([email]) // create unique index on email for faster queries
   @@map("user") // create table name as "user" instead of default "User"
