@@ -26,6 +26,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-blue: var(--brand-blue);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -68,6 +69,7 @@
 }
 
 :root {
+  --brand-blue: #058fff;
   --background: oklch(1 0 0);
   --foreground: oklch(0.0655 0.0175 247.6541);
   --card: oklch(1 0 0);

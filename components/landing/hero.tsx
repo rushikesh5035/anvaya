@@ -53,9 +53,9 @@ export function Hero() {
               />
             </div>
 
-            <h1 className="text-2xl font-medium tracking-tight text-balance md:text-4xl lg:text-5xl">
+            <h2 className="text-3xl font-semibold tracking-[-0.03em] text-balance lg:text-4xl">
               AI code reviews that understand the code around the change
-            </h1>
+            </h2>
 
             <p className="text-muted-foreground mx-auto mt-6 max-w-xl text-base leading-7 text-pretty sm:text-lg">
               CodeNook reviews pull requests with context from your entire

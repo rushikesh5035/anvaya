@@ -22,7 +22,7 @@ export function AppSidebar() {
         <SidebarMenuButton asChild className="ml-0">
           <Link href="#link">
             <LogoIcon className="size-8! shrink-0" />
-            <span className="text-base font-bold tracking-tight">Anvaya</span>
+            {/* <span className="text-base font-bold tracking-tight">Codenook</span> */}
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>

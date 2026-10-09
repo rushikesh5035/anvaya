@@ -27,7 +27,7 @@ export function Header() {
         className="xl mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8"
       >
         <div className="flex flex-1 items-center">
-          <Link aria-label="Anvaya home" href="/">
+          <Link aria-label="codenook home" href="/">
             <Logo className="text-foreground h-8 w-auto" />
           </Link>
         </div>
