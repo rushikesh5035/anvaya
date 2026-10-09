@@ -2,9 +2,9 @@ import Link from "next/link";
 
 import { PlusIcon, SearchIcon } from "lucide-react";
 
-import { navGroups } from "@/components/app-shared";
-import { LogoIcon } from "@/components/logo";
-import { NavGroup } from "@/components/nav-group";
+import { LogoIcon } from "@/components/common/logo";
+import { navGroups } from "@/components/sidebar/app-shared";
+import { NavGroup } from "@/components/sidebar/nav-group";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -19,10 +19,10 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader className="h-14 justify-center">
-        <SidebarMenuButton asChild>
+        <SidebarMenuButton asChild className="ml-0">
           <Link href="#link">
-            <LogoIcon />
-            <span className="text-sm font-semibold">Anvaya</span>
+            <LogoIcon className="size-8! shrink-0" />
+            <span className="text-base font-bold tracking-tight">Anvaya</span>
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { SidebarNavGroup } from "@/components/app-shared";
+import type { SidebarNavGroup } from "@/components/sidebar/app-shared";
 import { Collapsible } from "@/components/ui/collapsible";
 import {
   SidebarGroup,

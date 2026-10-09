@@ -2,15 +2,15 @@
 
 import { BellIcon, SendIcon } from "lucide-react";
 
-import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
-import { navLinks } from "@/components/app-shared";
-import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
-import { NavUser } from "@/components/nav-user";
+import { AppBreadcrumbs } from "@/components/sidebar/app-breadcrumbs";
+import { navLinks } from "@/components/sidebar/app-shared";
+import { CustomSidebarTrigger } from "@/components/sidebar/custom-sidebar-trigger";
+import { NavUser } from "@/components/sidebar/nav-user";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import { ThemeToggleButton } from "./common/theme-switch";
+import { ThemeToggleButton } from "../common/theme-switch";
 
 const activeItem = navLinks.find((item) => item.isActive);
 

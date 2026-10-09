@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+import { Header } from "@/components/landing/header";
 
-import { requireAuth } from "@/module/auth/lib/auth-utils";
-
-export default async function Home() {
-  await requireAuth();
-
-  return redirect("/dashboard");
+export default function Home() {
+  return (
+    <main className="bg-background min-h-screen overflow-x-clip">
+      <Header />
+    </main>
+  );
 }

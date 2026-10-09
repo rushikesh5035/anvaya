@@ -145,9 +145,9 @@ export const ThemeToggleButton = ({
     <Button
       type="button"
       variant="outline"
-      size="sm"
+      size="icon"
       className={cn(
-        "size-8 cursor-pointer p-0 transition-all duration-300 active:scale-95",
+        "size-9 cursor-pointer p-0 transition-all duration-300 active:scale-95",
         className
       )}
       onClick={toggleTheme}
