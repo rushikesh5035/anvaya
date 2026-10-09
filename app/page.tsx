@@ -1,5 +1,6 @@
 import { Header } from "@/components/landing/header";
 import { Hero } from "@/components/landing/hero";
+import { HowItWorks } from "@/components/landing/how-it-works";
 import { ReviewContext } from "@/components/landing/review-context";
 
 export default function Home() {
@@ -8,6 +9,7 @@ export default function Home() {
       <Header />
       <Hero />
       <ReviewContext />
+      <HowItWorks />
     </main>
   );
 }
